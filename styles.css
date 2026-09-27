@@ -1,0 +1,48 @@
+.frontmatter-templater-empty-state {
+  color: var(--text-muted);
+  padding: var(--size-4-3) 0;
+}
+
+.modal.mod-settings
+  .vertical-tab-content-container
+  .setting-item.frontmatter-templater-add-row,
+.modal.mod-settings
+  .vertical-tab-content-container
+  .setting-item.frontmatter-templater-rule {
+  gap: var(--size-4-3);
+  padding: var(--size-4-3) var(--size-4-3);
+}
+
+.frontmatter-templater-rule .setting-item-info {
+  min-width: 0;
+  padding-inline-end: var(--size-4-2);
+}
+
+.frontmatter-templater-rule .setting-item-name,
+.frontmatter-templater-rule .setting-item-description {
+  overflow-wrap: anywhere;
+}
+
+.frontmatter-templater-rule .setting-item-description {
+  margin-top: var(--size-2-1);
+}
+
+.frontmatter-templater-rule .setting-item-control {
+  flex-shrink: 0;
+}
+
+.frontmatter-templater-rule .clickable-icon {
+  transition: transform 120ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.frontmatter-templater-rule .clickable-icon:active:not([disabled]) {
+  transform: scale(0.96);
+}
+
+.frontmatter-templater-invalid-rule .setting-item-description {
+  color: var(--text-error);
+}
+
+.frontmatter-templater-modal .setting-item-control input {
+  min-width: min(24rem, 60vw);
+}

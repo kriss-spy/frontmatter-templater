@@ -1,0 +1,7 @@
+node_modules/
+obsidian-plugin-review-reports/
+migration-backups/
+.agents/
+skills-lock.json
+*.log
+.DS_Store

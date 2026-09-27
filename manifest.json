@@ -1,0 +1,9 @@
+{
+  "id": "frontmatter-templater",
+  "name": "Frontmatter Templater",
+  "version": "1.0.0",
+  "minAppVersion": "1.5.7",
+  "description": "Apply default and inherited folder templates configured from folder-note frontmatter.",
+  "author": "krisspy",
+  "isDesktopOnly": false
+}
