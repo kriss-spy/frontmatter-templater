@@ -12,6 +12,22 @@ import {
   reconcileFolderTemplateOrder,
   sanitizeSettings,
 } from "../src/settings";
+import { setInputValueAndNotify } from "../src/input-utils";
+
+describe("path suggestions", () => {
+  it("notifies the bound setting after replacing a partial query", () => {
+    const events: string[] = [];
+    const input = {
+      value: "def",
+      trigger: (eventType: string) => events.push(eventType),
+    };
+
+    setInputValueAndNotify(input, "Templates/Default.md");
+
+    assert.equal(input.value, "Templates/Default.md");
+    assert.deepEqual(events, ["input"]);
+  });
+});
 
 describe("folder template settings", () => {
   it("preserves a manual order and appends newly discovered rules", () => {

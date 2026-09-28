@@ -1,8 +1,10 @@
 import { AbstractInputSuggest, App, TFile, TFolder } from "obsidian";
+import { setInputValueAndNotify } from "./input-utils";
 
 abstract class PathSuggest<T extends TFile | TFolder> extends AbstractInputSuggest<T> {
   private static readonly MAX_RESULTS = 100;
   private readonly sortedItems: T[];
+  private readonly pathInputEl: HTMLInputElement;
 
   constructor(
     app: App,
@@ -10,6 +12,7 @@ abstract class PathSuggest<T extends TFile | TFolder> extends AbstractInputSugge
     items: () => T[],
   ) {
     super(app, inputEl);
+    this.pathInputEl = inputEl;
     this.sortedItems = items().sort((a, b) => a.path.localeCompare(b.path));
   }
 
@@ -29,7 +32,9 @@ abstract class PathSuggest<T extends TFile | TFolder> extends AbstractInputSugge
   }
 
   selectSuggestion(item: T): void {
-    this.setValue(item.path);
+    // AbstractInputSuggest.setValue() only replaces the visible text. Emit the
+    // input event too so SearchComponent.onChange persists the selected path.
+    setInputValueAndNotify(this.pathInputEl, item.path);
     this.close();
   }
 }

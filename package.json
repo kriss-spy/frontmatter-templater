@@ -1,6 +1,6 @@
 {
   "name": "frontmatter-templater",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Simple inherited folder templates for Obsidian, configured from folder-note frontmatter.",
   "main": "main.js",
   "type": "module",

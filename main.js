@@ -33,9 +33,18 @@ var import_obsidian2 = require("obsidian");
 
 // src/suggesters.ts
 var import_obsidian = require("obsidian");
+
+// src/input-utils.ts
+function setInputValueAndNotify(input, value) {
+  input.value = value;
+  input.trigger("input");
+}
+
+// src/suggesters.ts
 var _PathSuggest = class _PathSuggest extends import_obsidian.AbstractInputSuggest {
   constructor(app, inputEl, items) {
     super(app, inputEl);
+    this.pathInputEl = inputEl;
     this.sortedItems = items().sort((a, b) => a.path.localeCompare(b.path));
   }
   getSuggestions(query) {
@@ -52,7 +61,7 @@ var _PathSuggest = class _PathSuggest extends import_obsidian.AbstractInputSugge
     el.setText(item.path);
   }
   selectSuggestion(item) {
-    this.setValue(item.path);
+    setInputValueAndNotify(this.pathInputEl, item.path);
     this.close();
   }
 };
