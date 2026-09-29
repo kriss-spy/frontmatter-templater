@@ -88,9 +88,12 @@ Placeholder names are case-insensitive. Everything else is copied unchanged.
 
 Automatic template application waits briefly for the note creator to finish,
 then uses Obsidian's atomic vault processing API and writes only when the note
-is still empty. Avoid enabling overlapping automatic-template rules in other
-plugins for the same folders. Core Daily Notes can remain enabled; when it has
-already populated a note, Frontmatter Templater leaves that note unchanged.
+is still empty. It also checks newly created Markdown files when Obsidian opens
+them, covering note creators that do not emit the normal vault creation event;
+older empty notes are left untouched. Avoid enabling overlapping
+automatic-template rules in other plugins for the same folders. Core Daily
+Notes can remain enabled; when it has already populated a note, Frontmatter
+Templater leaves that note unchanged.
 
 The plugin uses only Obsidian APIs and supports desktop and mobile.
 

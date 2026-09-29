@@ -1,4 +1,5 @@
 import { moment, Notice, Plugin, TFile, TFolder } from "obsidian";
+import { shouldApplyTemplateOnOpen } from "./automatic-template";
 import { FrontmatterTemplaterSettingTab } from "./settings-tab";
 import {
   DEFAULT_SETTINGS,
@@ -18,7 +19,7 @@ export default class FrontmatterTemplaterPlugin extends Plugin {
   templateService!: TemplateService;
   private pendingFiles = new Map<TFile, number>();
   private vaultIsReady = false;
-  private automaticCreateHandlerRegistered = false;
+  private automaticTemplateHandlersRegistered = false;
 
   async onload(): Promise<void> {
     await this.loadSettings();
@@ -32,7 +33,7 @@ export default class FrontmatterTemplaterPlugin extends Plugin {
         if (metadataIndexReady) return;
         metadataIndexReady = this.templateService.rebuildIndex();
         if (this.vaultIsReady && metadataIndexReady) {
-          this.registerAutomaticCreateHandler();
+          this.registerAutomaticTemplateHandlers();
         }
       }),
     );
@@ -46,7 +47,7 @@ export default class FrontmatterTemplaterPlugin extends Plugin {
       // Build immediately for already-cached vaults. Otherwise automatic
       // processing stays disabled until MetadataCache emits `resolved`.
       metadataIndexReady = this.templateService.rebuildIndex();
-      if (metadataIndexReady) this.registerAutomaticCreateHandler();
+      if (metadataIndexReady) this.registerAutomaticTemplateHandlers();
     });
 
     this.registerEvent(
@@ -127,13 +128,20 @@ export default class FrontmatterTemplaterPlugin extends Plugin {
     });
   }
 
-  private registerAutomaticCreateHandler(): void {
-    if (this.automaticCreateHandlerRegistered) return;
-    this.automaticCreateHandlerRegistered = true;
+  private registerAutomaticTemplateHandlers(): void {
+    if (this.automaticTemplateHandlersRegistered) return;
+    this.automaticTemplateHandlersRegistered = true;
     this.registerEvent(
       this.app.vault.on("create", (abstractFile) => {
         if (abstractFile instanceof TFile && abstractFile.extension === "md") {
           this.scheduleAutomaticTemplate(abstractFile);
+        }
+      }),
+    );
+    this.registerEvent(
+      this.app.workspace.on("file-open", (file) => {
+        if (file instanceof TFile && shouldApplyTemplateOnOpen(file)) {
+          this.scheduleAutomaticTemplate(file);
         }
       }),
     );

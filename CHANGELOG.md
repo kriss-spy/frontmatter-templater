@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixed
+
+- Apply configured templates to newly opened notes when their creator does not emit Obsidian's normal vault creation event.
+
 ## 1.0.1 - 2026-09-28
 
 ### Fixed

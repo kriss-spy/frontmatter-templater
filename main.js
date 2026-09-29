@@ -25,6 +25,13 @@ __export(main_exports, {
 module.exports = __toCommonJS(main_exports);
 var import_obsidian6 = require("obsidian");
 
+// src/automatic-template.ts
+var NEW_NOTE_OPEN_WINDOW_MS = 1e4;
+function shouldApplyTemplateOnOpen(file, now = Date.now()) {
+  const age = now - file.stat.ctime;
+  return file.extension === "md" && age >= 0 && age <= NEW_NOTE_OPEN_WINDOW_MS;
+}
+
 // src/settings-tab.ts
 var import_obsidian3 = require("obsidian");
 
@@ -550,7 +557,7 @@ var FrontmatterTemplaterPlugin = class extends import_obsidian6.Plugin {
     this.settings = { ...DEFAULT_SETTINGS };
     this.pendingFiles = /* @__PURE__ */ new Map();
     this.vaultIsReady = false;
-    this.automaticCreateHandlerRegistered = false;
+    this.automaticTemplateHandlersRegistered = false;
   }
   async onload() {
     await this.loadSettings();
@@ -563,14 +570,14 @@ var FrontmatterTemplaterPlugin = class extends import_obsidian6.Plugin {
         if (metadataIndexReady) return;
         metadataIndexReady = this.templateService.rebuildIndex();
         if (this.vaultIsReady && metadataIndexReady) {
-          this.registerAutomaticCreateHandler();
+          this.registerAutomaticTemplateHandlers();
         }
       })
     );
     this.app.workspace.onLayoutReady(() => {
       this.vaultIsReady = true;
       metadataIndexReady = this.templateService.rebuildIndex();
-      if (metadataIndexReady) this.registerAutomaticCreateHandler();
+      if (metadataIndexReady) this.registerAutomaticTemplateHandlers();
     });
     this.registerEvent(
       this.app.metadataCache.on("changed", (file) => {
@@ -640,13 +647,20 @@ var FrontmatterTemplaterPlugin = class extends import_obsidian6.Plugin {
       }
     });
   }
-  registerAutomaticCreateHandler() {
-    if (this.automaticCreateHandlerRegistered) return;
-    this.automaticCreateHandlerRegistered = true;
+  registerAutomaticTemplateHandlers() {
+    if (this.automaticTemplateHandlersRegistered) return;
+    this.automaticTemplateHandlersRegistered = true;
     this.registerEvent(
       this.app.vault.on("create", (abstractFile) => {
         if (abstractFile instanceof import_obsidian6.TFile && abstractFile.extension === "md") {
           this.scheduleAutomaticTemplate(abstractFile);
+        }
+      })
+    );
+    this.registerEvent(
+      this.app.workspace.on("file-open", (file) => {
+        if (file instanceof import_obsidian6.TFile && shouldApplyTemplateOnOpen(file)) {
+          this.scheduleAutomaticTemplate(file);
         }
       })
     );
