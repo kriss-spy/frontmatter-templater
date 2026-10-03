@@ -53,8 +53,17 @@ describe("folder template settings", () => {
   it("sanitizes legacy settings without an order", () => {
     assert.deepEqual(sanitizeSettings({ defaultTemplate: " Default.md " }), {
       defaultTemplate: "Default.md",
+      templateFolder: "",
       folderTemplateOrder: [],
     });
+  });
+
+  it("normalizes the template folder and discards invalid values", () => {
+    assert.equal(
+      sanitizeSettings({ templateFolder: " /Templates\\\\Snippets// " }).templateFolder,
+      "Templates/Snippets",
+    );
+    assert.equal(sanitizeSettings({ templateFolder: 42 }).templateFolder, "");
   });
 });
 

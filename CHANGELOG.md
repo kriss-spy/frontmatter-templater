@@ -1,9 +1,12 @@
 # Changelog
 
-## Unreleased
+## 1.0.2 - 2026-10-03
 
 ### Fixed
 
+- Discover Markdown templates recursively so Insert template includes templates in nested folders such as `bases`.
+- Use the default template's folder for discovery, with an optional Template folder setting to select another root.
+- Protect templates in the discovered folder from automatic template application.
 - Apply configured templates to newly opened notes when their creator does not emit Obsidian's normal vault creation event.
 
 ## 1.0.1 - 2026-09-28

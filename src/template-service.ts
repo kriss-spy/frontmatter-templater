@@ -180,7 +180,14 @@ export class TemplateService {
     return rules.sort((a, b) => a.folder.path.localeCompare(b.folder.path));
   }
 
-  listKnownTemplates(): TFile[] {
+  private getTemplateFolder(): TFolder | null {
+    const configured = this.settings().templateFolder;
+    if (configured) return this.getFolder(configured);
+    const parent = this.resolveDefaultTemplate()?.parent;
+    return parent?.path ? parent : null;
+  }
+
+  private listAssignedTemplates(): TFile[] {
     const files = new Map<string, TFile>();
     const defaultTemplate = this.resolveDefaultTemplate();
     if (defaultTemplate) files.set(defaultTemplate.path, defaultTemplate);
@@ -190,8 +197,30 @@ export class TemplateService {
     return [...files.values()].sort((a, b) => a.path.localeCompare(b.path));
   }
 
+  listKnownTemplates(): TFile[] {
+    const files = new Map(
+      this.listAssignedTemplates().map((file) => [file.path, file]),
+    );
+    const root = this.getTemplateFolder();
+    const pending = root ? [root] : [];
+    while (pending.length > 0) {
+      const folder = pending.pop()!;
+      for (const child of folder.children) {
+        if (child instanceof TFolder) pending.push(child);
+        else if (child instanceof TFile && child.extension === "md") {
+          files.set(child.path, child);
+        }
+      }
+    }
+    return [...files.values()].sort((a, b) => a.path.localeCompare(b.path));
+  }
+
   isKnownTemplate(file: TFile): boolean {
-    return this.listKnownTemplates().some(
+    const folder = this.getTemplateFolder();
+    if (file.extension === "md" && folder && file.path.startsWith(`${folder.path}/`)) {
+      return true;
+    }
+    return this.listAssignedTemplates().some(
       (template) => template.path === file.path,
     );
   }

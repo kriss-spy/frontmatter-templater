@@ -2,7 +2,8 @@ import { App, Notice, PluginSettingTab, Setting } from "obsidian";
 import FrontmatterTemplaterPlugin from "./main";
 import { FolderTemplateModal } from "./folder-template-modal";
 import { reconcileFolderTemplateOrder } from "./settings";
-import { MarkdownFileSuggest } from "./suggesters";
+import { FolderSuggest, MarkdownFileSuggest } from "./suggesters";
+import { normalizeVaultPath } from "./template-utils";
 import type { FolderTemplateRule } from "./template-service";
 
 export class FrontmatterTemplaterSettingTab extends PluginSettingTab {
@@ -32,6 +33,22 @@ export class FrontmatterTemplaterSettingTab extends PluginSettingTab {
             await this.plugin.saveSettings();
           });
         new MarkdownFileSuggest(this.app, search.inputEl);
+      });
+
+    new Setting(containerEl)
+      .setName("Template folder")
+      .setDesc(
+        "Include all Markdown templates in this folder and its subfolders in Insert template. Leave blank to use the default template's folder.",
+      )
+      .addSearch((search) => {
+        search
+          .setPlaceholder("Templates")
+          .setValue(this.plugin.settings.templateFolder)
+          .onChange(async (value) => {
+            this.plugin.settings.templateFolder = normalizeVaultPath(value);
+            await this.plugin.saveSettings();
+          });
+        new FolderSuggest(this.app, search.inputEl);
       });
 
     new Setting(containerEl).setName("Folder templates").setHeading();

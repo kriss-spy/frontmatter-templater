@@ -207,6 +207,7 @@ function renderTemplate(content, variables) {
 // src/settings.ts
 var DEFAULT_SETTINGS = {
   defaultTemplate: "",
+  templateFolder: "",
   folderTemplateOrder: []
 };
 function sanitizeFolderTemplateOrder(value) {
@@ -246,6 +247,7 @@ function sanitizeSettings(value) {
   const defaultTemplate = stored.defaultTemplate;
   return {
     defaultTemplate: typeof defaultTemplate === "string" ? defaultTemplate.trim() : "",
+    templateFolder: typeof stored.templateFolder === "string" ? normalizeVaultPath(stored.templateFolder) : "",
     folderTemplateOrder: sanitizeFolderTemplateOrder(
       stored.folderTemplateOrder
     )
@@ -272,6 +274,15 @@ var FrontmatterTemplaterSettingTab = class extends import_obsidian3.PluginSettin
         await this.plugin.saveSettings();
       });
       new MarkdownFileSuggest(this.app, search.inputEl);
+    });
+    new import_obsidian3.Setting(containerEl).setName("Template folder").setDesc(
+      "Include all Markdown templates in this folder and its subfolders in Insert template. Leave blank to use the default template's folder."
+    ).addSearch((search) => {
+      search.setPlaceholder("Templates").setValue(this.plugin.settings.templateFolder).onChange(async (value) => {
+        this.plugin.settings.templateFolder = normalizeVaultPath(value);
+        await this.plugin.saveSettings();
+      });
+      new FolderSuggest(this.app, search.inputEl);
     });
     new import_obsidian3.Setting(containerEl).setName("Folder templates").setHeading();
     containerEl.createEl("p", {
@@ -503,7 +514,14 @@ var TemplateService = class {
     }
     return rules.sort((a, b) => a.folder.path.localeCompare(b.folder.path));
   }
-  listKnownTemplates() {
+  getTemplateFolder() {
+    var _a;
+    const configured = this.settings().templateFolder;
+    if (configured) return this.getFolder(configured);
+    const parent = (_a = this.resolveDefaultTemplate()) == null ? void 0 : _a.parent;
+    return (parent == null ? void 0 : parent.path) ? parent : null;
+  }
+  listAssignedTemplates() {
     const files = /* @__PURE__ */ new Map();
     const defaultTemplate = this.resolveDefaultTemplate();
     if (defaultTemplate) files.set(defaultTemplate.path, defaultTemplate);
@@ -512,8 +530,29 @@ var TemplateService = class {
     }
     return [...files.values()].sort((a, b) => a.path.localeCompare(b.path));
   }
+  listKnownTemplates() {
+    const files = new Map(
+      this.listAssignedTemplates().map((file) => [file.path, file])
+    );
+    const root = this.getTemplateFolder();
+    const pending = root ? [root] : [];
+    while (pending.length > 0) {
+      const folder = pending.pop();
+      for (const child of folder.children) {
+        if (child instanceof import_obsidian5.TFolder) pending.push(child);
+        else if (child instanceof import_obsidian5.TFile && child.extension === "md") {
+          files.set(child.path, child);
+        }
+      }
+    }
+    return [...files.values()].sort((a, b) => a.path.localeCompare(b.path));
+  }
   isKnownTemplate(file) {
-    return this.listKnownTemplates().some(
+    const folder = this.getTemplateFolder();
+    if (file.extension === "md" && folder && file.path.startsWith(`${folder.path}/`)) {
+      return true;
+    }
+    return this.listAssignedTemplates().some(
       (template) => template.path === file.path
     );
   }

@@ -64,10 +64,16 @@ The plugin does not edit `AGENTS.md` automatically.
 - **Apply configured template to the current empty note** applies the closest
   folder rule or the default template.
 - **Insert template** opens a searchable picker containing the default template
-  and every valid template referenced by a folder note, then inserts the chosen
-  template at the cursor.
+  and every valid template referenced by a folder note, plus all Markdown files
+  in the template folder and its subfolders, then inserts the chosen template
+  at the cursor. Set **Template folder** in the plugin settings to your template
+  directory (for example, `Templates`). When blank, it uses the default
+  template's folder, provided that folder is not the vault root. Templates in
+  nested folders such as `Templates/bases` and `Templates/latex math` are
+  included automatically. Non-Markdown files are excluded.
 
-Referenced template files are never automatically templated themselves.
+Referenced template files and Markdown files in the template folder are never
+automatically templated themselves.
 
 ## Placeholders
 

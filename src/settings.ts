@@ -2,11 +2,13 @@ import { normalizeVaultPath } from "./template-utils";
 
 export interface FrontmatterTemplaterSettings {
   defaultTemplate: string;
+  templateFolder: string;
   folderTemplateOrder: string[];
 }
 
 export const DEFAULT_SETTINGS: FrontmatterTemplaterSettings = {
   defaultTemplate: "",
+  templateFolder: "",
   folderTemplateOrder: [],
 };
 
@@ -56,6 +58,10 @@ export function sanitizeSettings(value: unknown): FrontmatterTemplaterSettings {
   return {
     defaultTemplate:
       typeof defaultTemplate === "string" ? defaultTemplate.trim() : "",
+    templateFolder:
+      typeof stored.templateFolder === "string"
+        ? normalizeVaultPath(stored.templateFolder)
+        : "",
     folderTemplateOrder: sanitizeFolderTemplateOrder(
       stored.folderTemplateOrder,
     ),
